@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using BranchAndChicken.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
@@ -48,7 +47,7 @@ namespace BranchAndChicken.Api.DataAccess
             while (dataReader.Read())
             {
                 //explicit cast
-                var id = (int)dataReader["Id"];
+                var id = (int) dataReader["Id"];
                 //implicit cast
                 var name = dataReader["name"] as string;
                 //convert to
@@ -64,8 +63,6 @@ namespace BranchAndChicken.Api.DataAccess
                     YearsOfExperience = yearsOfExperience
                 };
 
-
-
             }
 
 
@@ -74,7 +71,7 @@ namespace BranchAndChicken.Api.DataAccess
 
         public Trainer Get(string name)
         {
-            var trainer = _trainers.FirstOrDefault(t => t.Name == name);
+            var trainer = _trainers.First(t => t.Name == name);
             return trainer;
         }
 
@@ -83,6 +80,26 @@ namespace BranchAndChicken.Api.DataAccess
             var trainer = Get(name);
 
             _trainers.Remove(trainer);
+        }
+
+        public ActionResult<Trainer> GetSpecialty(string specialty)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Trainer Update(Trainer updatedTrainer, int id)
+        {
+            var trainerToUpdate = _trainers.First(trainer => trainer.Id == id);
+            trainerToUpdate.Name = updatedTrainer.Name;
+            trainerToUpdate.YearsOfExperience = updatedTrainer.YearsOfExperience;
+            trainerToUpdate.Specialty = updatedTrainer.Specialty;
+            return trainerToUpdate;
+        }
+
+        public Trainer Add(Trainer newTrainer)
+        {
+            _trainers.Add(newTrainer);
+            return newTrainer;
         }
     }
 }
