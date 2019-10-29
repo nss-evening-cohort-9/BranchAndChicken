@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BranchAndChicken.Api.DataAccess;
+﻿using BranchAndChicken.Api.DataAccess;
 using BranchAndChicken.Api.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace BranchAndChicken.Api.Controllers
 {
