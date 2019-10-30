@@ -22,10 +22,11 @@ namespace BranchAndChicken.Api.Controllers
         public ActionResult<Trainer> GetByName(string name)
         {
             var repo = new TrainerRepository();
-            return repo.Get(name);
+            var trainer = repo.Get(name);
+            return trainer;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public ActionResult<Trainer> GetById(int id)
         {
             throw new NotImplementedException();
@@ -69,6 +70,11 @@ namespace BranchAndChicken.Api.Controllers
             };
 
             var trainerThatGotUpdated = repo.Update(updatedTrainer, id);
+
+            if (trainerThatGotUpdated == null)
+            {
+                return NotFound("Could not update trainer");
+            }
 
             return Ok(trainerThatGotUpdated);
         }
