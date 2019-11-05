@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using BranchAndChicken.Api.Models;
+﻿using BranchAndChicken.Api.Models;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
+
 
 namespace BranchAndChicken.Api.DataAccess
 {
@@ -14,64 +14,39 @@ namespace BranchAndChicken.Api.DataAccess
         
         public List<Trainer> GetAll()
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var db = new SqlConnection(_connectionString))
             {
-                connection.Open();
+                var trainers = db.Query<Trainer>("Select * From Trainer");
 
-                var cmd = connection.CreateCommand();
-                cmd.CommandText = @"Select * 
-                                From Trainer";
-
-                var dataReader = cmd.ExecuteReader();
-
-                var trainers = new List<Trainer>();
-
-                while (dataReader.Read())
-                {
-                    trainers.Add(GetTrainerFromDataReader(dataReader));
-                }
-                return trainers;
+                return trainers.AsList();
             }
         }
 
         public Trainer Get(string name)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var db = new SqlConnection(_connectionString))
             {
-                connection.Open();
+                var sql = @"select *
+                            from Trainer
+                            where Trainer.Name = @trainerName";
 
-                var cmd = connection.CreateCommand();
-                cmd.CommandText = @"select *
-                                     from Trainer
-                                     where Trainer.Name = @trainerName";
+                var parameters = new {trainerName = name};
 
-                cmd.Parameters.AddWithValue("trainerName", name);
+                var trainer = db.QueryFirst<Trainer>(sql, parameters);
 
-                var reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    return GetTrainerFromDataReader(reader);
-                }
+                return trainer;
             }
-
-            return null;
         }
 
         public bool Remove(string name)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var db = new SqlConnection(_connectionString))
             {
-                connection.Open();
+                var sql = @"delete 
+                            from trainer 
+                            where [name] = @name";
 
-                var cmd = connection.CreateCommand();
-                cmd.CommandText = @"delete 
-                                    from trainer 
-                                    where [name] = @name";
-
-                cmd.Parameters.AddWithValue("name", name);
-
-                return cmd.ExecuteNonQuery() == 1;
+                return db.Execute(sql, new {name}) == 1;
             }
         }
 
@@ -82,43 +57,36 @@ namespace BranchAndChicken.Api.DataAccess
 
         public Trainer Update(Trainer updatedTrainer, int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var db = new SqlConnection(_connectionString))
             {
-                connection.Open();
-
-                var cmd = connection.CreateCommand();
-                cmd.CommandText = @"
-                            UPDATE [Trainer]
+                var sql = @"UPDATE [Trainer]
                                 SET [Name] = @name
                                     ,[YearsOfExperience] = @yearsOfExperience
                                     ,[Specialty] = @specialty
                             output inserted.*
                                 WHERE id = @id";
 
-                cmd.Parameters.AddWithValue("name", updatedTrainer.Name);
-                cmd.Parameters.AddWithValue("yearsOfExperience", updatedTrainer.YearsOfExperience);
-                cmd.Parameters.AddWithValue("specialty", updatedTrainer.Specialty);
-                cmd.Parameters.AddWithValue("id", id);
+                //var parameters = new
+                //{
+                //    Id = id,
+                //    Name = updatedTrainer.Name,
+                //    YearsOfExperience = updatedTrainer.YearsOfExperience,
+                //    Specialty = updatedTrainer.Specialty
+                //};
 
-                var reader = cmd.ExecuteReader();
+                updatedTrainer.Id = id;
 
-                if (reader.Read())
-                {
-                    return GetTrainerFromDataReader(reader);
-                }
-
-                return null;
+                var trainer = db.QueryFirst<Trainer>(sql, updatedTrainer);
+                
+                return trainer;
             }
         }
 
         public Trainer Add(Trainer newTrainer)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            using (var db = new SqlConnection(_connectionString))
             {
-                connection.Open();
-
-                var cmd = connection.CreateCommand();
-                cmd.CommandText = @"INSERT INTO [Trainer]
+                var sql = @"INSERT INTO [Trainer]
                                            ([Name]
                                            ,[YearsOfExperience]
                                            ,[Specialty])
@@ -128,46 +96,8 @@ namespace BranchAndChicken.Api.DataAccess
                                            ,@yearsOfExperience
                                            ,@specialty)";
 
-                cmd.Parameters.AddWithValue("name", newTrainer.Name);
-                cmd.Parameters.AddWithValue("yearsOfExperience", newTrainer.YearsOfExperience);
-                cmd.Parameters.AddWithValue("specialty", newTrainer.Specialty);
-
-                var reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    return GetTrainerFromDataReader(reader);
-                }
+                return db.QueryFirst<Trainer>(sql, newTrainer);
             }
-
-            return null;
         }
-
-
-        Trainer GetTrainerFromDataReader(SqlDataReader reader)
-        {
-            //explicit cast
-            var id = (int) reader["Id"];
-            //implicit cast
-            var name = reader["name"] as string;
-            //convert to
-            var yearsOfExperience = Convert.ToInt32(reader["YearsOfExperience"]);
-            //try parse
-            if (Enum.TryParse<Specialty>(reader["specialty"].ToString(), out var specialty))
-            {
-                //do something
-            }
-
-            var trainer = new Trainer
-            {
-                Specialty = specialty,
-                Id = id,
-                Name = name,
-                YearsOfExperience = yearsOfExperience
-            };
-
-            return trainer;
-        }
-
     }
 }
