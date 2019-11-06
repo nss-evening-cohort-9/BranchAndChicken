@@ -16,7 +16,7 @@ namespace BranchAndChicken.Api.DataAccess
         {
             using (var db = new SqlConnection(_connectionString))
             {
-                var trainers = db.Query<Trainer>("Select * From Trainer");
+                var trainers = db.Query<Trainer>("Select Id,Name,YearsOfExperience,Specialty From Trainer");
 
                 return trainers.AsList();
             }
