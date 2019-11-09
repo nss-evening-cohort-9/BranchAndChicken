@@ -18,6 +18,14 @@ namespace BranchAndChicken.Api.DataAccess
             {
                 var trainers = db.Query<Trainer>("Select Id,Name,YearsOfExperience,Specialty From Trainer");
 
+                foreach (var trainer in trainers)
+                {
+                    var chickenRepo = new ChickenRepository();
+                    var chickensForTrainer = chickenRepo.GetChickensForTrainer(trainer.Id);
+
+                    trainer.Coop.AddRange(chickensForTrainer);
+                }
+
                 return trainers.AsList();
             }
         }
