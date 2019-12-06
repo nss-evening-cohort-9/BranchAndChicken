@@ -1,0 +1,25 @@
+@import 'styles/_colors';
+
+.Login {
+  flex: 1 4 auto;
+  padding: 2rem;
+  border: 1rem double $darkGray;
+  position: relative;
+  background: $white;
+  transition: all 0.3s;
+  box-shadow: 0 5px 5px $black;
+  overflow: scroll;
+
+  input {
+    padding: 10px;
+    line-height: 1;
+    font-size: 1.2rem;
+    border: 1px solid $black;
+    border-radius: 0;
+    background: $white;
+  }
+  input:focus{
+    outline: 0;
+    background: $peach;
+  }
+}

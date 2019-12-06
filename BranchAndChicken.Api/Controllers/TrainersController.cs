@@ -4,14 +4,15 @@ using BranchAndChicken.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using BranchAndChicken.Api.Commands;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BranchAndChicken.Api.Controllers
 {
     [Route("api/trainers")]
-    [ApiController]
-    public class TrainersController : ControllerBase
+    [ApiController,Authorize]
+    public class TrainersController : FirebaseEnabledController
     {
-        [HttpGet]
+        [HttpGet,AllowAnonymous]
         public ActionResult<IEnumerable<Trainer>> GetAllTrainers()
         {
             var repo = new TrainerRepository();
