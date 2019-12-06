@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 
 import authRequests from '../../Requests/auth';
 
-import './Register.css';
 
 class Register extends React.Component {
   state = {
