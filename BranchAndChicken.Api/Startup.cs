@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using BranchAndChicken.Api.DataAccess;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,6 +29,11 @@ namespace BranchAndChicken.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var authSettings = Configuration.GetSection("AuthenticationSettings");
+            var connectionString = Configuration.GetValue<string>("ConnectionString");
+
+            #region asp.net stuff
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddCors(options =>
@@ -34,22 +41,27 @@ namespace BranchAndChicken.Api
                     builder => builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin())
                 );
 
-            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                     {
                         options.IncludeErrorDetails = true;
-                        options.Authority = "https://securetoken.google.com/fish-store-a71e6";
+                        options.Authority = authSettings["Authority"];
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
-                            ValidIssuer = "https://securetoken.google.com/fish-store-a71e6",
+                            ValidIssuer = authSettings["Issuer"],
                             ValidateAudience = true,
-                            ValidAudience = "fish-store-a71e6",
+                            ValidAudience = authSettings["Audience"],
                             ValidateLifetime = true
                         };
                     }
                 );
+
+            #endregion
+
+            services.AddTransient<SqlConnection>(provider => new SqlConnection(connectionString));
+            services.AddScoped<TrainerRepository>();
+            services.AddSingleton(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

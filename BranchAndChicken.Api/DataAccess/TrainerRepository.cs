@@ -4,14 +4,20 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 
 namespace BranchAndChicken.Api.DataAccess
 {
     public class TrainerRepository
     {
-        string _connectionString = "Server=localhost;Database=BranchAndChicken;Trusted_Connection=True;";
-        
+        string _connectionString;
+
+        public TrainerRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetValue<string>("ConnectionString");
+        }
+
         public List<Trainer> GetAll()
         {
             using (var db = new SqlConnection(_connectionString))

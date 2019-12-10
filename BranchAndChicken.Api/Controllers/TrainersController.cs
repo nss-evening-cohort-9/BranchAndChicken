@@ -12,18 +12,23 @@ namespace BranchAndChicken.Api.Controllers
     [ApiController,Authorize]
     public class TrainersController : FirebaseEnabledController
     {
+        readonly TrainerRepository _repo;
+
+        public TrainersController(TrainerRepository repo)
+        {
+            _repo = repo;
+        }
+
         [HttpGet,AllowAnonymous]
         public ActionResult<IEnumerable<Trainer>> GetAllTrainers()
         {
-            var repo = new TrainerRepository();
-            return repo.GetAll();
+            return _repo.GetAll();
         }
 
         [HttpGet("{name}")]
         public ActionResult<Trainer> GetByName(string name)
         {
-            var repo = new TrainerRepository();
-            var trainer = repo.Get(name);
+            var trainer = _repo.Get(name);
             return trainer;
         }
 
@@ -38,8 +43,7 @@ namespace BranchAndChicken.Api.Controllers
         {
             try
             {
-                var repo = new TrainerRepository();
-                return repo.GetSpecialty(specialty);
+                return _repo.GetSpecialty(specialty);
             }
             catch (Exception e)
             {
@@ -51,8 +55,7 @@ namespace BranchAndChicken.Api.Controllers
         [HttpDelete("{name}")]
         public IActionResult DeleteTrainer(string name)
         {
-            var repo = new TrainerRepository();
-            repo.Remove(name);
+            _repo.Remove(name);
 
             return Ok();
 
@@ -61,8 +64,6 @@ namespace BranchAndChicken.Api.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateTrainer(UpdateTrainerCommand updatedTrainerCommand, int id)
         {
-            var repo = new TrainerRepository();
-
             var updatedTrainer = new Trainer
             {
                 Name = updatedTrainerCommand.Name,
@@ -70,7 +71,7 @@ namespace BranchAndChicken.Api.Controllers
                 Specialty = updatedTrainerCommand.Specialty
             };
 
-            var trainerThatGotUpdated = repo.Update(updatedTrainer, id);
+            var trainerThatGotUpdated = _repo.Update(updatedTrainer, id);
 
             if (trainerThatGotUpdated == null)
             {
@@ -91,8 +92,7 @@ namespace BranchAndChicken.Api.Controllers
                 Specialty = newTrainerCommand.Specialty
             };
 
-            var repo = new TrainerRepository();
-            var trainerThatGotCreated = repo.Add(newTrainer);
+            var trainerThatGotCreated = _repo.Add(newTrainer);
 
             return Created($"api/trainers/{trainerThatGotCreated.Name}", trainerThatGotCreated);
         }
